@@ -1,0 +1,413 @@
+@@@@7638 union-set
+
+1200012706Ëï±óèº
+
+#lang racket
+(define (quick-sort arr)
+  (if (null? arr)
+      '()
+      (let ((x (car arr)))
+        (append (quick-sort (filter (lambda (y) (< y x)) (cdr arr)))
+                (list x)
+                (quick-sort (filter (lambda (y) (> y x)) (cdr arr)))))))
+(define (myloop)
+  (let ((a (read))
+        (b (read)))
+    (if (eq? a eof)
+        (void)
+        (begin (displayln (quick-sort (append a b))) (myloop)))))
+(myloop)
+
+
+Ð»Åå³½ 1400012832(xpc)
+
+#lang racket
+
+(define (union a b)
+  (cond ((null? a) b)
+        ((null? b) a)
+        (else (let ((x (car a)) (y (car b)))
+                (cond ((= x y) (cons x (union (cdr a) (cdr b))))
+                      ((< x y) (cons x (union (cdr a) b)))
+                      (else (cons y (union a (cdr b)))))))))
+(define (norm a)
+  (if (null? a) '() (union (list (car a)) (norm (cdr a)))))
+(define (main)
+  (let ((a (read)) (b (read)))
+    (if (eq? a eof) (void)
+        (begin (displayln (union (norm a) (norm b))) (main)))))
+(main)
+
+
+
+
+1300013265ÍõÁ¦²©(WLBQE)
+
+#lang racket
+(define (quickSort lst)
+  (cond ((null? lst) null)
+        (else (append (quickSort (filter (lambda (x) (< x (car lst))) lst))
+                      (list (car lst))
+                      (quickSort (filter (lambda (x) (> x (car lst))) lst))))))
+
+(define (myLoop)
+  (let ((a (read))
+        (b (read)))
+    (if (eq? a eof)
+        (void)
+        (begin
+          (displayln (quickSort (append a b)))
+          (myLoop)))))
+(myLoop)
+
+
+
+@@@@7615 SICP¿Î±¾Á·Ï°2.69 ¹þ·òÂü±àÂëÊ÷
+
+
+
+
+1200012706Ëï±óèº
+
+
+#lang racket
+(define (generate-huffman-tree set)
+  (define (g set)
+    (if (null? (cdr set))
+        set
+        (g (adjoin-set (make-code-tree (car set) (cadr set)) (cddr set)))))
+  (g (make-leaf-set set)))
+
+(define (encode code huffman-tree)
+  (define (encode-single c current-branch)
+    (cond ((leaf? current-branch)
+           '())
+          ((null? (filter (lambda (x) (eq? c x)) (symbols (left-branch current-branch)))) ; To the right
+           (cons 1 (encode-single c (right-branch current-branch))))
+          (else ; To the left
+           (cons 0 (encode-single c (left-branch current-branch))))))
+  (define (encode-1 str)
+    (if (= 0 (string-length str))
+        '()
+        (append (encode-single (string->symbol (substring str 0 1)) huffman-tree) (encode-1 (substring str 1)))))
+  (encode-1 (symbol->string code)))
+
+
+1300011605ÕÅ²©Ðû
+
+#lang racket
+;your code starts here
+(define (generate-huffman-tree lf)
+  (define (gene leafs)
+    (if (null? leafs)
+        '()
+        (if (null? (cdr leafs))
+            (car leafs)
+            (gene (adjoin-set (make-code-tree (car leafs) (cadr leafs)) (cddr leafs))))))
+  (gene (make-leaf-set lf)))
+
+(define (symbol->list sym)
+  (map (lambda (s) (string->symbol (string s))) (string->list (symbol->string sym))))
+
+(define (encode s hfm)
+  (define (in-tree? x tree)
+    (define (in-list? x lst)
+      (if (null? lst)
+          #f
+          (if (eq? x (car lst))
+              #t
+              (in-list? x (cdr lst)))))
+    (in-list? x (symbols tree)))
+    
+  (define (encode-single x tree)
+    (if (leaf? tree)
+        '()
+        (if (in-tree? x (car tree))
+            (cons 0 (encode-single x (car tree)))
+            (cons 1 (encode-single x (cadr tree))))))
+        
+  
+  (define (encode-l lst)
+    (if (null? lst)
+        '()
+        (append (encode-single (car lst) hfm)
+                (encode-l (cdr lst)))))
+  (encode-l (symbol->list s))) 
+
+
+1300012781 ÖÓÔóÐù
+
+#lang racket
+(define (generate-huffman-tree s)
+  (define (merge leaf-set)
+    (if (null? (cdr leaf-set))
+        (car leaf-set)
+        (merge (adjoin-set (make-code-tree (car leaf-set) (cadr leaf-set))
+                           (cddr leaf-set)))))
+  (merge (make-leaf-set s)))
+
+(define (encode s huffman-tree)
+  (define (isIn ch S)
+    (if (null? S)
+        #f
+        (if (eq? (string->symbol (string ch)) (car S))
+            #t
+            (isIn ch (cdr S)))))
+  (define (encode-1 s tree)
+    (if (null? s)
+        '()
+        (if (leaf? tree)
+            (encode-1 (cdr s) huffman-tree)
+            (if (isIn (car s) (symbols (left-branch tree)))
+                (cons '0 (encode-1 s (left-branch tree)))
+                (cons '1 (encode-1 s (right-branch tree)))))))
+  (encode-1 (string->list (symbol->string s)) huffman-tree))
+
+
+
+
+
+@@@@7616 SICP¿Î±¾Á·Ï°2.58 (b) ·ûºÅÇóµ¼
+
+
+Â¬ÖÇ´Ï-1300011602
+
+#lang racket
+(define (=number? exp num)
+    (and (number? exp)
+         (= exp num)))
+
+(define (variable? x)
+    (symbol? x))
+
+(define (same-variable? v1 v2)
+    (and (variable? v1)
+         (variable? v2)
+         (eq? v1 v2)))
+
+(define (psExp exp sep)
+  (define (iter exp sub)
+    (cond ((or (null? exp)
+               (eq? (car exp) sep))
+           sub)
+          (else (iter (cdr exp) (append sub (list (car exp)))))))
+  (iter exp '()))
+
+(define (ssExp exp sep)
+  (cond ((null? exp) '())
+        ((eq? (car exp) sep) (cdr exp))
+        (else (ssExp (cdr exp) sep))))
+
+(define (sum? x)
+  (and (pair? x)
+       (not (null? (filter (lambda (e) (eq? e '+)) x)))))
+
+(define (addend s)
+  (let ((r (psExp s '+)))
+    (if (< (length r) 2) (car r) r)))
+
+(define (augend s)
+  (let ((r (ssExp s '+)))
+    (if (< (length r) 2) (car r) r)))
+
+(define (product? x)
+  (and (pair? x) (eq? (cadr x) '*)))
+
+(define (multiplier p) (car p))
+
+(define (multiplicand p)
+  (let ((r (cdr (cdr p))))
+    (cond ((< (length r) 2) (car r))
+          (else r))))
+
+(define (make-sum a1 a2)
+  (cond ((=number? a1 0) a2)
+        ((=number? a2 0) a1)
+        ((and (number? a1) (number? a2) (+ a1 a2)))
+        (else (let ((s1 (if (or (variable? a1)
+                                (number? a1))
+                            (list a1 '+)
+                            (append a1 '(+))))
+                    (s2 (if (or (variable? a2)
+                                (number? a2))
+                            (list a2)
+                            a2)))
+                (append s1 s2)))))
+
+(define (make-product m1 m2)
+  (cond ((or (=number? m1 0) (=number? m2 0)) 0)
+        ((=number? m1 1) m2)
+        ((=number? m2 1) m1)
+        ((and (number? m1) (number? m2)) (* m1 m2))
+        (else (let ((p1 (cond ((or (variable? m1) (number? m1))
+                               (list m1 '*))
+                              ((sum? m1) (list m1 '*))
+                              (else (append m1 '(*)))))
+                    (p2 (cond ((or (variable? m2) (number? m2))
+                               (list m2))
+                              ((sum? m2) (list m2))
+                              (else m2))))
+                (append p1 p2)))))
+
+
+1300011605ÕÅ²©Ðû
+
+#lang racket
+(define (accumulate op init seq)
+  (if (null? seq)
+      init
+      (op (car seq) (accumulate op init (cdr seq)))))
+
+(define (variable? x) (symbol? x))
+
+(define (same-variable? v1 v2)
+  (and (variable? v1) (variable? v2) (eq? v1 v2)))
+
+(define (sum? e)
+  (accumulate (lambda (x y) (or x y)) #f
+              (map (lambda (x) (eq? '+ x)) e)))
+
+(define (product? e)
+  (and (pair? e) (eq? (cadr e) '*)))
+
+(define (make-sum e1 e2)
+  (cond ((eq? e1 0) e2)
+        ((eq? e2 0) e1)
+        ((and (number? e1) (number? e2) (+ e1 e2)))
+        (else (let ((l (if (or (variable? e1)
+                                (number? e1))
+                            (list e1 '+)
+                            (append e1 '(+))))
+                    (r (if (or (variable? e2)
+                                (number? e2))
+                            (list e2)
+                            e2)))
+                (append l r)))))
+
+(define (findleft e s)
+  (define (iter exp sub)
+    (cond ((or (null? exp)
+               (eq? (car exp) s))
+           sub)
+          (else (iter (cdr exp) (append sub (list (car exp)))))))
+  (iter e '()))
+
+(define (findright e s)
+  (cond ((null? e) '())
+        ((eq? (car e) s) (cdr e))
+        (else (findright (cdr e) s))))
+
+(define (addend e)
+  (let ((x (findleft e '+)))
+    (if (= (length x) 1)
+        (car x)
+        x)))
+
+(define (augend e)
+  (let ((x (findright e '+)))
+    (if (= (length x) 1)
+        (car x)
+        x)))
+     
+(define (multiplier e) (car e))
+
+(define (multiplicand e)
+  (let ((x (cdr (cdr e))))
+    (cond ((< (length x) 2) (car x))
+          (else x))))
+
+
+(define (make-product e1 e2)
+  (cond ((or (eq? e1 0) (eq? e2 0)) 0)
+        ((eq? e1 1) e2)
+        ((eq? e2 1) e1)
+        ((and (number? e1) (number? e2)) (* e1 e2))
+        (else (let ((l (cond ((or (variable? e1) (number? e1))
+                               (list e1 '*))
+                              ((sum? e1) (list e1 '*))
+                              (else (append e1 '(*)))))
+                    (r (cond ((or (variable? e2) (number? e2))
+                               (list e2))
+                              ((sum? e2) (list e2))
+                              (else e2))))
+                (append l r)))))
+
+
+1400012960 Áõ´ºêÍ
+
+#lang racket
+
+(define (variable? n)
+  (symbol? n))
+
+(define (same-variable? a b)
+  (and (variable? a) (variable? b) (eq? a b)))
+
+(define (sum? n)
+  (cond ((null? n) #f)
+        ((not (pair? n)) #f)
+        ((variable? n) #f)
+        ((eq? (car n) '+) #t)
+        (else (sum? (cdr n)))))
+
+(define (=number? a b)
+  (and (number? a) (= a b)))
+
+(define (ch1 n)
+  (if (or (sum? n) (product? n)) n (list n)))
+
+(define (ch2 x)
+  (if (sum? x) (list x)
+      (if (product? x) x (list x))))
+
+
+(define (make-sum a b)
+  (cond ((=number? a 0) b)
+        ((=number? b 0) a)
+        ((and (number? a) (number? b)) (+ a b))
+        (else (append (ch1 a) (list '+) (ch1 b) ))))
+         
+(define (product? n)
+  (cond ((null? n) #f)
+        ((not (pair? n)) #f)
+        ((variable? n) #f)
+        ((eq? (car n) '*) #t)
+        (else (product? (cdr n)))))
+
+(define (make-product a b)
+  (cond ((or (=number? a 0) (=number? b 0)) 0)
+        ((=number? a 1) b)
+        ((=number? b 1) a)
+        ((and (number? a) (number? b)) (* a b))
+        (else (append (ch2 a) (list '*) (ch2 b) ))))
+
+(define (find lt ls t ty)
+  (if (eq? t (car lt))
+      (if (= ty 0)
+          ls
+          (cdr lt))
+      (find (cdr lt) (append ls (list (car lt))) t ty)))
+   
+(define (addend n)
+  (let ( (ans (find n '() '+ 0)) )
+    (if (null? (cdr ans))
+        (car ans)
+        ans)))
+
+(define (augend n)
+  (let ( (ans (find n '() '+ 1)) )
+    (if (null? (cdr ans))
+        (car ans)
+        ans)))
+
+(define (multiplier n)
+  (let ( (ans (find n '() '* 0)) )
+    (if (null? (cdr ans))
+        (car ans)
+        ans)))
+
+(define (multiplicand n)
+  (let ( (ans (find n '() '* 1)) )
+    (if (null? (cdr ans))
+        (car ans)
+        ans)))

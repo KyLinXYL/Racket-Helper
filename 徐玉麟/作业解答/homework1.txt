@@ -1,0 +1,155 @@
+****第一次作业
+
+@@@@7571 求最大值
+
+by 李卓翰
+
+#lang racket
+
+(define (getmax n nowmax)
+  (if (= n 0)
+      nowmax
+      (getmax (- n 1) (max nowmax (read)))))
+
+(define (main)
+  (let ((n (read)))
+    (if (eq? n eof)
+        (void)
+        (begin (displayln (getmax (- n 1) (read)))
+               (main)))))
+
+((lambda () (read) (void)))
+(main)
+
+@@@@7572 排序
+
+by 孙斌涛
+
+
+#lang racket
+(define (output-list l)
+  (if (null? (cdr l))
+      (displayln (car l))
+      (begin (display (car l)) (display " ") (output-list (cdr l)))))
+(define (sort)
+  (define (insert elem arr)
+    (cond ((null? arr) (list elem))
+          ((= elem (car arr)) arr)
+          ((< elem (car arr)) (cons elem arr))
+          ((> elem (car arr)) (cons (car arr) (insert elem (cdr arr))))))
+  (let ((x (read)))
+    (if (eq? x eof)
+        (list)
+        (insert x (sort)))))
+(output-list (sort))
+
+
+
+@@@@7583 帕斯卡三角形
+
+by 谢冰阳
+
+#lang racket
+
+(define (printRow row col val)
+  (if (<= col row)
+  (begin (display val)(display " ")(printRow row (+ col 1) (* val (/ (- row col) (+ col 1)))))
+  (void)))
+
+
+(define (loop)
+  (let ((a (read)))
+    (if(eq? a eof)
+       (void)
+       (begin (printTriangle a 0)(loop)))))
+
+(define (printTriangle n count)
+  (if (eq? count n)
+      (void)
+      (begin (printRow count 0 1)(newline)(printTriangle n (+ count 1)))))
+
+(loop)
+
+
+
+@@@@7602  SICP EX 2.16 必须用迭代完成的快速幂
+
+by 李卓翰
+
+#lang racket
+(define (even? num)
+  (= (remainder num 2) 0))
+
+(define (fast-exp ans a n)
+  (cond ((= n 0) ans)
+        ((even? n) (fast-exp ans (* a a) (/ n 2)))
+        (else (fast-exp (* ans a) a (- n 1)))))
+
+(define (main)
+  (let ((a (read))
+        (n (read)))
+    (if (eq? a eof)
+        (void)
+        (begin (displayln (fast-exp 1 a n))
+               (main)))))
+
+(main)
+
+
+
+@@@@7606 SICP课本练习1.37
+@@@@7607 SICP课本练习1.41
+#lang racket
+;by Guo Wei
+(define (cont-frac N D k)
+  (define (iter N D i)
+    (if (= i k )
+      (/ (N k) (D k))
+      (/ (N i) (+ (D i) (iter N D (+ i 1))))))
+  (iter N D 1))
+
+(define (cont-frac-iter N D k)
+  (define (iter N D i result)
+    (if (= i 0)
+        result
+        (iter N D (- i 1) (/ (N i) (+ (D i) result)))))
+  (iter N D k 0))
+
+
+
+ (cont-frac (lambda (x) 1.0) 
+           (lambda (x) 1.0)
+           30)
+      
+(cont-frac-iter (lambda (x) 1.0) 
+           (lambda (x) 1.0)
+           30)
+
+
+@@@@7635 傻瓜二重循环
+
+By 陈乐天
+
+#lang racket
+
+(define (dowork n m i)
+  (define (print j)
+    (display j)
+    (display ",")
+    (if (= j m)
+        (display #\newline)
+        (print (+ j 1))))
+  (print 1)
+  (if (= i n)
+      (void)
+      (dowork n m (+ i 1))))
+
+
+(define (loop)
+  (let ((n (read))
+        (m (read)))
+    (if (eq? n eof)
+        (void)
+        (begin (dowork n m 1) (loop)))))
+
+(loop)

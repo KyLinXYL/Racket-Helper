@@ -1,0 +1,138 @@
+@@@@7619  SICP¿Î±¾Á·Ï° 3.17
+
+(define (count-pairs x)
+    (define (inner x memo-list)
+      (if (and (pair? x) (not (memq x memo-list)))
+          (inner (car x) (inner (cdr x) (cons x memo-list)))
+          memo-list))
+   (length (inner x '())))
+
+
+#### 1200016904-ÕÅ³É¾Å
+
+
+(begin
+   
+   (define (count-pairs x)
+    (length (in x '())))
+
+(define (in x mylist)
+    (if (and (pair? x)
+             (not (memq x mylist)))
+        (in (car x)
+               (in (cdr x)
+                      (cons x mylist)))
+        mylist))
+)
+
+
+#### 1200016205-ĞÜµä
+(define count-pairs
+    (let ((visited (list)))
+      (lambda (x)
+        (if (memq x visited) 0
+            (if (pair? x)
+                (begin (set! visited (cons x visited)) (+ (count-pairs (car x)) (count-pairs (cdr x)) 1))
+                0)))))
+
+
+
+#### 1400012704(ÕÂĞşÈó)
+
+(define (count-pairs x)
+   (if (not (pair? x))
+       0
+       (if (eq? (car x) 'use)
+           0
+           (let ((x1 (car x))
+                 (x2 (cdr x)))
+             (set-car! x 'use)
+             (+ (count-pairs x1)
+                (count-pairs x2)
+                1)))))
+
+
+
+#### 1500012732Îâê»Ôó
+
+(define (count-pairs x)
+  (define lst '())
+  (define (cnt v)
+    (if (pair? v)
+        (if (member v lst)
+            0
+            (begin (set! lst (cons v lst))
+                   (+ (cnt (car v))
+                      (cnt (cdr v))
+                      1)))
+        0))
+  (cnt x))
+
+#### 1500012785Àî×¿º²
+
+(define (count-pairs lst)
+   (define hash-list '())
+   (define (iter x)
+     (if (or (not (pair? x))
+             (memq x hash-list))
+         0
+         (begin (set! hash-list (cons x hash-list))
+                (+ (iter (car x))
+                   (iter (cdr x))
+                   1))))
+   (iter lst))
+
+
+
+@@@@7620 SICP ¿Î±¾Á·Ï° 3.18
+
+####1300011605ÕÅ²©Ğû  ????¸Ä±äÁËlst
+
+(define (check-cycle lst)
+         (let ((temp lst))
+         (if (null? lst)
+             #f
+             (if (eq? #t (car lst))
+                 #t
+                 (begin (set-car! lst #t)
+                        (check-cycle (cdr lst)))))))
+
+
+#### 1400016601
+
+(begin
+   (define (make-cycle lst)
+     (set-cdr! lst lst)
+     lst)
+   (define (check-cycle list-1)
+   (define (iter n list-2)
+     (cond ((null? list-2) #f)
+           ((= 0 n) #t)
+           (else (iter (- n 1) (cdr list-2)))))
+   (iter 100 list-1)))
+
+
+#### 1200012706Ëï±óèº
+(define (check-cycle l)
+  (define (mycddr x)
+    (cond ((not (pair? x)) #f)
+          ((not (pair? (cdr x))) #f)
+          (else (cddr x))))
+  (define (go x1 x2)
+    (cond ((eq? x1 x2) #t)
+          ((not x1) #f)
+          (else (go (mycddr x1) (cdr x2)))))
+  (if (not (pair? l)) #f (go (mycddr l) (cdr l))))
+
+
+#### 1400012824ÀîºìÍú(lihw)
+
+(define (check-cycle lst)
+        (define (check-helper p1 p2)
+            (cond ((null? p2) #f)
+                  ((null? (cdr p2)) #f)
+                  ((eq? (car p1) (car p2)) #t)
+                  (else (check-helper (cdr p1) (cddr p2)))))
+        (if (null? lst)
+            #f
+            (check-helper lst (cdr lst))))

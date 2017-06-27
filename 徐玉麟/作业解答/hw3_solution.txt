@@ -1,0 +1,252 @@
+@@@@7636 super-map
+
+1300013265Õı¡¶≤©
+
+(define (super-map op . w)
+  (if (null? (car w))
+      null
+      (cons (apply op (map car w)) (apply super-map op (map cdr w)))))
+
+
+
+1500012785¿Ó◊ø∫≤
+
+(define (super-map op . w)
+  (define (opt-list lst1 lst2)
+    (if (null? lst1)
+        '()
+        (cons (op (car lst1) (car lst2))
+              (opt-list (cdr lst1) (cdr lst2)))))
+  (if (null? (cdr w))
+      (car w)
+      (apply super-map
+             op
+             (cons (opt-list (car w)
+                             (cadr w))
+                   (cddr w)))))
+
+
+@@@@7614 pipeline
+
+1500012732Œ‚Íª‘Û
+
+(define (pipeline operand . ops)
+  (if (null? ops)
+  	operand
+  	(apply pipeline (cons ((car ops) operand) (cdr ops)))))
+
+
+
+@@@@ 7612 SICPøŒ±æ¡∑œ∞2.36  accumulate-n
+
+1200016205-–‹µ‰
+
+(define (accumulate-n op init seqs)
+  (if (null? seqs)
+      '()
+      (cons (accumulate op init
+		(map car seqs))
+            (accumulate-n op init (filter (lambda (x) (not (null? x))) (map cdr seqs)))) ))
+
+
+
+1200016904-’≈≥…æ≈
+
+(define (accumulate-n op init seqs)
+  (if (null? seqs)
+      '()
+      (cons (accumulate op init
+(map car seqs))
+            (if(= 1 (length (car seqs)))
+               '()
+               (accumulate-n op init (map cdr seqs))))))
+
+
+Guo Wei
+
+(define (accumulate-n op init seqs)
+  (if (null? seqs)
+      '()
+      (cons (accumulate op init
+                        (map car seqs))
+            (accumulate-n op init (if (null? (cdar seqs))
+                                      '()
+                                      (map cdr seqs))))))
+
+
+
+@@@@7586 ∞Àª ∫Û
+
+
+1300013719≥¬”ÔÊÃ
+
+
+#lang racket
+
+(define queenlist '())
+
+(define (int mylist init)
+  (if (null? mylist)
+      init
+      (int (cdr mylist) (+ (* 10 init) (car mylist)))))
+
+(define (check queens newqueen)  ;newqueen is a pair
+  (if (null? queens)
+      #true
+      (begin
+        (if (= (cdar queens) (cdr newqueen))  ;y1=y2
+            #false
+            (if (= (abs (- (caar queens) (car newqueen)))
+                   (abs (- (cdar queens) (cdr newqueen)))) ;x1-x2=y1-y2
+                #false
+                (check (cdr queens) newqueen))))))
+
+(define (eightqueens queens)
+  (define (trynewqueen queens n)
+        (if (> n 8)
+            (void)
+            (let ((newqueen (cons (+ (length queens) 1) n)))
+              (if (check queens newqueen)
+                  (eightqueens (append queens (list newqueen)))
+                  (void))
+              (trynewqueen queens (+ n 1)))))
+  (if (= (length queens) 8)
+      (set! queenlist (append queenlist (list (int (map cdr queens) 0))))
+      (trynewqueen queens 1)))
+
+(eightqueens '())
+
+(define n (read))
+
+(define (myloop)
+  (let ((a (read)))
+    (if (eq? a eof)
+        (void)
+        (begin
+          (displayln (list-ref queenlist (- a 1)))
+          (myloop)))))
+
+(myloop)
+
+1300012781 ÷”‘Û–˘
+
+#lang racket
+
+(define (enumerate-interval low high) 
+  (if (> low high)
+      '()
+      (cons low (enumerate-interval (+ low 1) high))))
+
+(define (accumulate op initial sequence) (if (null? sequence)
+        initial
+        (op (car sequence)
+            (accumulate op initial (cdr sequence)))))
+
+(define (flatmap proc seq)
+  (accumulate append '() (map proc seq)))
+
+(define (filter-by-x x all)
+  (define (check x)
+    (lambda (L)
+      (define (iter i L)
+        (if (null? L)
+            true
+            (if (and (not (eq? x (car L))) (not (eq? i (abs (- x (car L))))))
+                (iter (+ i 1) (cdr L))
+                false)))
+      (iter 1 L)))
+  (filter (check x) all))
+
+(define (gen k)
+  (if (= k 0)
+      (list '())
+      (let ((sub (gen (- k 1))))
+        (flatmap (lambda (i)
+                   (map (lambda (L)
+                          (cons i L))
+                        (filter-by-x i sub)))
+                 (enumerate-interval 1 8)))))
+
+(define (get index L)
+  (define (iter i L)
+        (if (= i index)
+            (car L)
+            (iter (+ i 1) (cdr L))))
+      (iter 1 L))
+
+(define (my-display L)
+  (begin
+    (map (lambda (x) (display x))
+         L)
+    (newline)))
+
+(define (main)
+  (let ((index (read)))
+    (if (eq? index eof)
+        (void)
+        (begin
+          (my-display (get index ans))
+          (main)))))
+
+(define ans (gen 8))
+(let ((a (read))) (main))
+
+
+1500012732Œ‚Íª‘Û
+
+#lang racket
+(define ls '())
+(define (dfs d y p m n)
+  (define (enum c)
+  	(define (van ls e)
+  	  (cond ((null? ls) true)
+  	  		((= e (car ls)) false)
+  	  		(else (van (cdr ls) e))))
+  	(if (= c 9)
+  	  (void)
+  	  (begin (enum (+ c 1))
+  	  		 (if (and (van y c)
+  	  		 		  (van p (+ d c))
+  	  		 		  (van m (- d c)))
+  	  		   	 (dfs (+ d 1)
+  	  		   	 	  (cons c y)
+  	  		   	 	  (cons (+ d c) p)
+  	  		   	 	  (cons (- d c) m)
+  	  		   	 	  (+ (* n 10) c))
+  	  		   	 (void)))))
+  (if (= d 9)
+  	(set! ls (cons n ls))
+  	(enum 1)))
+(dfs 1 '() '() '() 0)
+
+(define (loop n)
+  (define (find ls m)
+  	(if (= m 1)
+  	  (car ls)
+  	  (find (cdr ls) (- m 1))))
+  (if (zero? n)
+  	(void)
+  	(begin (displayln (find ls (read)))
+  		   (loop (- n 1)))))
+(loop (read))
+
+
+
+
+@@@@7613 SICPøŒ±æ¡∑œ∞ 2.41  tri-num-list
+
+¡ı ±Ïœ
+
+(define (tri-num-list n s)
+  (define (make-list n)
+    (flatmap (lambda(i)
+               (flatmap (lambda(j)
+                          (map (lambda(k)
+                                 (list i j k))
+                               (enumerate-interval (+ 1 j) n)))
+                        (enumerate-interval (+ 1 i) n)))
+             (enumerate-interval 1 n)))
+  (filter (lambda (x) (= s (accumulate + 0 x) ) ) (make-list n) ))
+
+
+

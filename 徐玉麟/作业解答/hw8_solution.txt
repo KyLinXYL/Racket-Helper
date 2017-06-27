@@ -1,0 +1,72 @@
+@@@@7623 SICP¿Î±¾Á·Ï° 3.71
+
+#### 1500012785Àî×¿º²
+
+
+(define (interleaf-w s1 s2 w)
+  (let ((f1 (stream-car s1))
+        (f2 (stream-car s2)))
+    (if (< (w f1) (w f2))
+        (cons-stream f1 (interleaf-w (stream-cdr s1) s2 w))
+        (cons-stream f2 (interleaf-w s1 (stream-cdr s2) w)))))
+        
+        
+(define (weighted-pairs s t w)
+  (cons-stream
+   (list (stream-car s) (stream-car t))
+   (interleaf-w
+    (stream-map (lambda (x) (list (stream-car s) x))
+                (stream-cdr t))
+    (weighted-pairs (stream-cdr s) (stream-cdr t) w)
+    w)))
+
+(define (cost p)
+  (+ (cube (car p)) (cube (cadr p))))
+
+(define (Ramanujan lst)
+  ;(displayln lst)
+  (if (= (cost (stream-car lst)) (cost (stream-car (stream-cdr lst))))
+      (cons-stream (cost (stream-car lst)) (Ramanujan (stream-cdr lst)))
+      (Ramanujan (stream-cdr lst))))
+
+
+@@@@7624 ¿Î±¾Á·Ï° 3.73
+
+
+(define (integral s)
+  (cons-stream 0 (add-stream s (integral s))))
+(define (RC R C intv)
+  (lambda (i-stream V)
+    (add-stream (stream-map (lambda (x) (+ V (* R x))) i-stream)
+                (stream-map (lambda (x) (/ (* intv x) C)) (integral i-stream)))))
+(define (add-stream s1 s2)
+  (cons-stream (+ (stream-car s1) (stream-car s2))
+               (add-stream (stream-cdr s1) (stream-cdr s2))))
+
+
+@@@@7625 ¿Î±¾Á·Ï° 3.78
+
+####1300012900-ÐìÓñ÷ë
+
+(define (add-stream s1 s2)
+  (cond((stream-null? s1) s2)
+       ((stream-null? s2) s1)
+       (else (cons-stream (+ (stream-car s1) (stream-car s2))
+                          (add-stream (stream-cdr s1) (stream-cdr s2))))))
+(define (scale-stream s times)
+  (cond((stream-null? s) s)
+       (else (cons-stream (* (stream-car s) times)
+                          (scale-stream (stream-cdr s) times)))))
+(define (integral delayed-integrand initial-value dt)
+  (define int
+    (cons-stream initial-value
+                 (let ((integrand (force delayed-integrand)))
+                   (add-stream (scale-stream integrand dt) int))))
+  int)
+(define (solve-2nd a b dt y0 dy0)
+  (define y (integral (delay dy) y0 dt))
+  (define dy (integral (delay ddy) dy0 dt))
+  (define ddy
+    (add-stream (scale-stream dy a)
+                (scale-stream y b)))
+  y)

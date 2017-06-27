@@ -1,0 +1,50 @@
+﻿@@@@ 7599 flat-map
+孙斌韬
+
+#lang racket
+(define (flat-map l)
+  (cond ((null? l) '())
+        ((pair? l) (append (flat-map (car l)) (flat-map (cdr l))))
+        (else (list l))))
+(define (myloop)
+  (let ((l (read)))
+    (if (eq? l eof)
+        (void)
+        (begin (displayln (flat-map l)) (myloop)))))
+(myloop)
+
+
+
+@@@@7587 深度反转一棵树
+
+陈德里（1400016636）
+
+#lang racket
+(define (deep-reverse L)
+(if (pair? L)
+    (reverse (map deep-reverse L))
+    L))
+
+(define (loop)
+  (define x (read))
+  (if (eq? x eof)
+      (void)
+      (begin (display(deep-reverse x))  (newline)(loop))))
+(loop)
+
+
+卢智聪-1300011602
+#lang racket
+(define (myloop)
+(define (reverse lst)
+  (if (null? lst) null
+  (if (list? lst)
+      (append (reverse (cdr lst)) (list (reverse (car lst)))) 
+      lst)))
+  
+(let ((a (read)))
+(if (eq? a eof)
+(void)
+(begin (display (reverse a)) (newline) (myloop)))))
+
+(myloop)

@@ -1,0 +1,177 @@
+@@@@7596  走迷宫
+
+####1400012616 Luolc
+
+#lang racket
+
+; Constants
+(define INF_VAL 2147483647)
+(define BLANK 'B)
+(define WALL 'W)
+(define GATE 'M)
+(define directions (list (cons 1 0) (cons 0 1) (cons -1 0) (cons 0 -1)))
+
+; Variables
+(define mMap (vector))
+(define mRow 0)
+(define mCol 0)
+(define mAsset 0)
+(define mAns INF_VAL)
+
+; Util Functions
+(define (updateAnswer newAnswer)
+	(if (< newAnswer mAns)
+		(set! mAns newAnswer)
+		(void)))
+
+(define (getMapAt x y)
+	(vector-ref (vector-ref mMap x) y))
+
+(define (setMapAt x y val)
+	(define tmpRow (vector-ref mMap x))
+	(vector-set! tmpRow y val)
+	(vector-set! mMap x tmpRow))
+
+; Logic
+(define (solve)
+	(define (dfs x y depth)
+		(define (move directionIdx)
+			(if (= directionIdx 4)
+				(void)
+				(let 
+					([direction (list-ref directions directionIdx)])
+					(let (
+						[nextX (+ x (car direction))]
+						[nextY (+ y (cdr direction))])
+						(if (and (>= nextX 0) (>= nextY 0) (< nextX mRow) (< nextY mCol))
+							(let 
+								([type (getMapAt nextX nextY)])
+								(cond 
+									[(eq? type WALL) (move (+ 1 directionIdx))]
+									[(eq? type BLANK)
+										(begin
+											(setMapAt nextX nextY WALL)
+											(dfs nextX nextY (+ 1 depth))
+											(setMapAt nextX nextY BLANK)
+											(move (+ 1 directionIdx)))]
+									[(eq? type GATE)
+										(if (> mAsset 0)
+											(begin
+												(setMapAt nextX nextY WALL)
+												(set! mAsset (- mAsset 1))
+												(dfs nextX nextY (+ 1 depth))
+												(setMapAt nextX nextY GATE)
+												(set! mAsset (+ mAsset 1))
+												(move (+ 1 directionIdx)))
+											(move (+ 1 directionIdx)))]))
+							(move (+ 1 directionIdx))
+							)))))
+		(if (and (= x (- mRow 1)) (= y (- mCol 1)))
+			(updateAnswer depth)
+			(move 0)))
+	(dfs 0 0 0)
+	(if (= mAns INF_VAL)
+		(displayln 'inf)
+		(displayln mAns)))
+
+(define n (read))
+(define (work idx)
+	(if (= idx n)
+		(void)
+		(begin
+			(let (
+				[row (read)]
+				[col (read)]
+				[asset (read)])
+				(define (inputRow r)
+					(define tmpRow (make-vector col))
+					(define (inputCol c)
+						(if (= c col)
+							(void)
+							(begin
+								(vector-set! tmpRow c (read))
+								(inputCol (+ 1 c)))))
+					(if (= r row)
+						(void)
+						(begin
+							(inputCol 0)
+							(vector-set! mMap r tmpRow)
+							(inputRow (+ 1 r)))))
+				(begin
+					(set! mMap (make-vector row))
+					(inputRow 0)
+					(set! mRow row)
+					(set! mCol col)
+					(set! mAsset asset)
+					(set! mAns INF_VAL)
+					(solve)
+					))
+			(work (+ 1 idx)))))
+
+(work 0)
+
+
+
+@@@@7585 抓住那头牛
+
+
+#### 1300012781 钟泽轩
+
+#lang racket
+(require r5rs)
+
+(define trace (make-vector 200101 #f))
+(define (visited lst trace)
+  (if (or (< lst 0) (>= lst 200100))
+      #t
+      (vector-ref trace lst)))
+(define (set-visited lst)
+  (if (or (< lst 0) (>= lst 200100))
+      (void)
+      (vector-set! trace lst #t)))
+
+(define n (read))
+(define k (read))
+
+(define (search head tail)
+  (if (= (caar head) k)
+      (cdar head)
+      (begin
+        (set-visited (caar head))
+        (if (not (visited (* 2 (caar head)) trace))
+            (begin (set-cdr! tail (cons (cons (* 2 (caar head)) (+ 1 (cdar head))) '()))
+                   (set! tail (cdr tail)))
+            (void))
+        (if (not (visited (+ 1 (caar head)) trace))
+            (begin (set-cdr! tail (cons (cons (+ 1 (caar head)) (+ 1 (cdar head))) '()))
+                   (set! tail (cdr tail)))
+            (void))
+        (if (not (visited (- (caar head) 1) trace))
+            (begin (set-cdr! tail (cons (cons (- (caar head) 1) (+ 1 (cdar head))) '()))
+                   (set! tail (cdr tail)))
+            (void))
+        (search (cdr head) tail))))
+
+(define head (cons (cons n 0) '()))
+(define tail head)
+
+(displayln (search head tail))
+
+
+@@@@7640 SICP课本练习 3.30
+
+
+####  1400013706陈乐天
+
+(define (ripple-carry-adder wire-lstA wire-lstB wire-lstS wireCN)
+  (define (add-1 Ak Bk Sk C)
+    (let ((S (make-wire))
+          (Cout (make-wire)))
+      (if (null? (cdr Ak)) 
+          (full-adder (car Ak) (car Bk) C (car Sk) wireCN)
+          (begin
+            (full-adder (car Ak) (car Bk) C (car Sk) Cout)
+            (add-1 (cdr Ak) (cdr Bk) (cdr Sk) Cout)))))
+  (add-1 wire-lstA wire-lstB wire-lstS (make-wire)))
+
+
